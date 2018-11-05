@@ -42,3 +42,11 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+
+Setting height to 100%
+http://angular-ui.github.io/angular-google-maps/views/examples/base/base.html?example=google-map
+https://github.com/angular-ui/angular-google-maps/issues/309
+
+CORS API Fetching
+https://hacks.mozilla.org/2015/03/this-api-is-so-fetching/
