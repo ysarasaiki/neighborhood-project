@@ -44,9 +44,16 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 To learn React, check out the [React documentation](https://reactjs.org/).
 
 
+Started from react-build-app
+
 Setting height to 100%
-http://angular-ui.github.io/angular-google-maps/views/examples/base/base.html?example=google-map
-https://github.com/angular-ui/angular-google-maps/issues/309
+Get size of browser window
+https://stackoverflow.com/questions/3437786/get-the-size-of-the-screen-current-web-page-and-browser-window
+
+Calculate height of an element
+https://stackoverflow.com/questions/526347/how-do-you-get-the-rendered-height-of-an-element
+
+
 
 CORS API Fetching
 https://hacks.mozilla.org/2015/03/this-api-is-so-fetching/

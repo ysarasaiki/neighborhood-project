@@ -1,22 +1,35 @@
 import React, { Component } from 'react';
 import './App.css';
 import PlacesList from './PlacesListView.js';
+import PlacesSearch from './PlacesSearch.js';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      // Hard-code climbing areas.. TODO: dropdown of areas
+      // areaName: 'Donner Pass',
+      // areaLoc: {
+      //   lat: 39.33,
+      //   lng: -120.335
+      // },
+      areaName: 'Yosemite',
+      areaLoc: {
+        lat: 37.74,
+        lng: -119.573
+      },
+      places: [],
+      markers: [],
+      visibleMarkers: [],
+      selectedMarker: null
+    };
+    
+    this.updatevisibleMarkers = this.updatevisibleMarkers.bind(this)
+    this.updateSelectedMarker = this.updateSelectedMarker.bind(this)
 
-  state = {
-    // areaName: 'Donner Pass',
-    // areaLoc: {
-    //   lat: 39.33,
-    //   lng: -120.335
-    // },
-    areaName: 'Yosemite',
-    areaLoc: { // yosemite
-      lat: 37.74,
-      lng: -119.573
-    },
-    places: []
-  };
+  }
+
+
 
   loadAsyncScript(src) {
 
@@ -50,7 +63,7 @@ class App extends Component {
       const apiKey = '200185210-f8a4389a5a9f500ff4af0996569a855a';
       const source = `https://www.mountainproject.com/data/get-routes-for-lat-lon?lat=${lat}&lon=${lng}&maxDistance=10&minDiff=5.6&maxDiff=5.10&key=${apiKey}`
 
-      // Fetch
+      // Fetch Mountain Project API
       fetch(source)
       .then(response => {
         if (!response.ok) {
@@ -61,18 +74,9 @@ class App extends Component {
       .then(results => {
         resolve(results.routes.filter(route => route.stars >= 4.5))
       })
-      .catch(error => console.log('looks like there is an error'))
+      .catch(error => console.log('There was an error with getting Mountain Project data!'))
 
     })
-  }
-
-  openInfoWindow(map, marker) {
-    const google = window.google;
-    var infowindow = new google.maps.InfoWindow();
-    
-    infowindow.marker = marker;
-    infowindow.setContent(`<div>${marker.title}</div>`);
-    infowindow.open(map, marker);
   }
 
   initMap() {
@@ -86,13 +90,16 @@ class App extends Component {
 
     var infowindow = new google.maps.InfoWindow();
     var bounds = new google.maps.LatLngBounds();
+    const markers = [];
+    const infoWindows = [];
 
-    // Call function to get marker data
+    // Call function to get places data
     this.getData()
+
     .then(classicRoutes => {
       this.setState({places: classicRoutes})
 
-      classicRoutes.map(route => {
+      classicRoutes.forEach(route => {
         // console.log(route)
         var marker = new google.maps.Marker({
           map: map,
@@ -114,12 +121,23 @@ class App extends Component {
             `<div><img src=${route.imgSmall}></div>`
             );
           infowindow.open(map, marker)
-        });
+          this.setState({selectedMarker: marker})
+
+        }.bind(this));
         
+        markers.push(marker);
+        infoWindows.push(infowindow)
         bounds.extend(marker.position);
       })
+
     })
-    .then(() => map.fitBounds(bounds))
+    .then(() => {
+      this.setState({markers})
+      this.setState({infoWindows})
+      this.setState({visibleMarkers: markers})
+
+      map.fitBounds(bounds)
+    })
 
     // Set map height based on current window height
     const headerHeight = document.getElementById('areaTitle').clientHeight
@@ -132,19 +150,51 @@ class App extends Component {
     })
   } 
 
+  updatevisibleMarkers(visibleMarkers) {
+    this.setState({visibleMarkers})
+  }
+
+  updateSelectedMarker(selectedMarker) {
+    this.setState({selectedMarker})
+  }
+
+  toggleMenu() {
+    document.getElementById('list-container').classList.toggle('closed')
+  }
+
   render() {
     return (
       <div id="container">
-        <header id="areaTitle">{this.state.areaName} Classic Climbing Routes!</header>
-        <div id="list-container">
-          <PlacesList 
-            places = {this.state.places}
-          />
+        <header id="areaTitle">
+          <button 
+            className="hamburgerIcon"
+            onClick = {this.toggleMenu}
+          ></button>
+          <h1>{this.state.areaName} Classic Climbing Routes!</h1>
+        </header>
+         <div id="main">
+          <div id="list-container" className="closed">
+            <div id="search-container">
+              <PlacesSearch 
+                places = {this.state.places}
+                updatevisibleMarkers = {this.updatevisibleMarkers}
+                markers = {this.state.markers}
+                infoWindows = {this.state.infoWindows}
+              />
+            </div>
+            <ul id="places-list">
+              <PlacesList 
+                visibleMarkers = {this.state.visibleMarkers}
+                selectedMarker = {this.state.selectedMarker}
+                updateSelectedMarker = {this.updateSelectedMarker}
+              />
+
+            </ul>
+          </div>
+          <div id="map-container">
+            <div id="map"></div>
+          </div>
         </div>
-        <div id="map-container">
-          <div id="map"></div>
-        </div>
-        
       </div>
     );
   }
