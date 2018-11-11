@@ -146,8 +146,6 @@ class App extends Component {
     this.loadInfowindowContent(marker);
     marker.setAnimation(window.google.maps.Animation.DROP)
 
-
-
     this.state.map.setCenter(marker.position)
   }
 
@@ -160,7 +158,7 @@ class App extends Component {
       `<div>Rating: ${placeInfo.rating}</div>`+
       `<div>Stars: ${placeInfo.stars}, (${placeInfo.starVotes} reviews)</div>`+
       `<a href=${placeInfo.url}>Mountain Project Link</a><br>`+
-      `<img src=${placeInfo.imgSmall}>`
+      `<img src=${placeInfo.imgSmall} alt=${placeInfo.name + " Image"}>`
 
     this.state.infowindow.setContent(infowindowContent)
   }
@@ -183,8 +181,6 @@ class App extends Component {
 
         this.state.map.fitBounds(bounds)
       }
-
-      // show only search result markers
     })
   }
 
@@ -197,13 +193,13 @@ class App extends Component {
   }
 
   render() {
-    // {console.log(this.state.searchResultMarkers)}
     return (
       <div id="container">
         <header id="areaTitle">
           <button 
             className="hamburgerIcon"
             onClick = {this.toggleMenu}
+            aria-label="Menu Icon"
           ></button>
           <h1>{this.state.areaName} Classic Climbing Routes!</h1>
         </header>

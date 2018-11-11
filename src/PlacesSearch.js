@@ -4,8 +4,6 @@ import escapeRegExp from 'escape-string-regexp'
 class PlacesSearch extends Component {
 	state = {
 		query: ''
-		// ,
-		// searchResults: this.props.markers
 	}
 
 	updateQuery(query) {
@@ -32,6 +30,8 @@ class PlacesSearch extends Component {
 		return (
 			<div>
 				<input 
+					aria-labelledby="filter results"
+					role = "search"
 					type="text" 
 					placeholder="Search route"
 					onChange={(evt) => this.updateQuery(evt.target.value)}
