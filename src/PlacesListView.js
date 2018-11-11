@@ -5,54 +5,32 @@ class PlacesList extends Component {
 	// TODO: check propptypes
 
 
-
-	selectMarker (selectedMarker, visibleMarkers) {
-		const { updateSelectedMarker } = this.props
-
-		updateSelectedMarker(selectedMarker);
-	}
-
-	displaySelectedMarker(selectedMarker, visibleMarkers) {
-		if (selectedMarker) {
-			this.highlightMarker(selectedMarker, visibleMarkers)
-			this.highlightListItem(selectedMarker)
-		}
-	}
-
-	highlightMarker(selectedMarker, visibleMarkers) {
-		visibleMarkers.forEach(marker => {
-			marker.setIcon('https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi2.png')
-			marker.setAnimation(null)
-		})
-
-		selectedMarker.setIcon('https://www.google.com/mapfiles/marker_green.png')
-		selectedMarker.setAnimation(window.google.maps.Animation.BOUNCE)
-	}
-
 	highlightListItem(selectedMarker) {
 		const listItems = document.getElementsByTagName('li')
 		for (let item of listItems) {
 			if (item.innerHTML === selectedMarker.title) {
-				// bold the selected item
-				item.style.fontWeight='bold';
+				// add clas to selected item
+				item.className += 'selected'
 			} else {
-				// unbold all list items
-				item.style.fontWeight = 'normal'
+				// deselect
+				item.classList.remove('selected')
 			}
 		}		
 	}
 
 	render () {
-		const { visibleMarkers, selectedMarker } = this.props
-		this.displaySelectedMarker(selectedMarker, visibleMarkers)
+		const { searchResultMarkers, openMarker } = this.props
 
 		return (
 			<React.Fragment>
-				{visibleMarkers.map(marker => 
+				{searchResultMarkers.map(marker => 
 					<li 
 						key={marker.title}
-						onClick = {(evt) => this.selectMarker(marker, visibleMarkers)}
-						>{marker.title}
+						onClick = {() => {
+							openMarker(marker)
+							this.highlightListItem(marker)
+						}}
+					>{marker.title}
 					</li>
 				)}
 

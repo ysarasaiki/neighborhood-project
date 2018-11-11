@@ -7,32 +7,23 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      // Hard-code climbing areas.. TODO: dropdown of areas
-      // areaName: 'Donner Pass',
-      // areaLoc: {
-      //   lat: 39.33,
-      //   lng: -120.335
-      // },
       areaName: 'Yosemite',
       areaLoc: {
         lat: 37.74,
         lng: -119.573
       },
-      places: [],
+      places: '',
+      infowindow: '',
       markers: [],
-      visibleMarkers: [],
-      selectedMarker: null
-    };
-    
-    this.updatevisibleMarkers = this.updatevisibleMarkers.bind(this)
-    this.updateSelectedMarker = this.updateSelectedMarker.bind(this)
+      searchResultMarkers: []
+    }
 
+    this.generateMarkers = this.generateMarkers.bind(this)
+    this.openMarker = this.openMarker.bind(this)
+    this.updateSearchResultMarkers = this.updateSearchResultMarkers.bind(this)
   }
 
-
-
   loadAsyncScript(src) {
-
     const script = window.document.createElement('script');
 
     script.src = src;
@@ -46,7 +37,6 @@ class App extends Component {
 
   componentDidMount() {
     window.initMap = this.initMap.bind(this);
-    
 
     const ApiKey = 'AIzaSyD_uPwl5iUqJPQpqBzrKQNpPxX1BoqbyPk';
     const source = `https://maps.googleapis.com/maps/api/js?key=${ApiKey}&callback=initMap`;
@@ -55,7 +45,7 @@ class App extends Component {
   }
 
   getData () {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const lat = this.state.areaLoc.lat;
       const lng = this.state.areaLoc.lng;
 
@@ -72,7 +62,11 @@ class App extends Component {
         return response.json();
       })
       .then(results => {
-        resolve(results.routes.filter(route => route.stars >= 4.5))
+        // console.log(results)
+        return results.routes.filter(route => route.stars >= 4.5)
+      })
+      .then(filteredResults => {
+        resolve(this.setState({places: filteredResults}))
       })
       .catch(error => console.log('There was an error with getting Mountain Project data!'))
 
@@ -80,63 +74,23 @@ class App extends Component {
   }
 
   initMap() {
-    const google = window.google;
     const mapDiv = document.getElementById('map');
 
-    const map = new google.maps.Map(mapDiv, {
+    const map = new window.google.maps.Map(mapDiv, {
       center: this.state.areaLoc,
-      zoom: 13
+      zoom: 13,
+      disableDefaultUI: true
     });
 
-    var infowindow = new google.maps.InfoWindow();
-    var bounds = new google.maps.LatLngBounds();
-    const markers = [];
-    const infoWindows = [];
+    const infowindow = new window.google.maps.InfoWindow();
 
-    // Call function to get places data
-    this.getData()
-
-    .then(classicRoutes => {
-      this.setState({places: classicRoutes})
-
-      classicRoutes.forEach(route => {
-        // console.log(route)
-        var marker = new google.maps.Marker({
-          map: map,
-          position: {
-            lat: route.latitude,
-            lng: route.longitude
-          },
-          title: route.name
-        });
-
-        marker.addListener('click', function () {
-          infowindow.marker = marker;
-          infowindow.setContent(
-            `<h3>${route.name}</h3>`+
-            `<div>${route.type}</div>`+
-            `<div>Rating: ${route.rating}</div>`+
-            `<div>Stars: ${route.stars}, (${route.starVotes} reviews)</div>`+
-            `<a href=${route.url}>Mountain Project</a>`+
-            `<div><img src=${route.imgSmall}></div>`
-            );
-          infowindow.open(map, marker)
-          this.setState({selectedMarker: marker})
-
-        }.bind(this));
-        
-        markers.push(marker);
-        infoWindows.push(infowindow)
-        bounds.extend(marker.position);
-      })
-
+    this.setState({
+      map: map,
+      infowindow: infowindow
     })
-    .then(() => {
-      this.setState({markers})
-      this.setState({infoWindows})
-      this.setState({visibleMarkers: markers})
 
-      map.fitBounds(bounds)
+    this.getData().then(() => {
+      this.generateMarkers()
     })
 
     // Set map height based on current window height
@@ -146,23 +100,104 @@ class App extends Component {
     // Dynamically change map size and resize to fit all markers
     window.addEventListener('resize', function() {
       mapDiv.style.height = window.innerHeight - headerHeight + 'px';
-      map.fitBounds(bounds)
+      // map.fitBounds(bounds)
     })
-  } 
-
-  updatevisibleMarkers(visibleMarkers) {
-    this.setState({visibleMarkers})
   }
 
-  updateSelectedMarker(selectedMarker) {
-    this.setState({selectedMarker})
+  generateMarkers() {
+    const self = this;
+    var bounds = new window.google.maps.LatLngBounds();
+    var markers = [];
+
+    this.state.places.forEach(place => {
+      var marker = new window.google.maps.Marker({
+        map: this.state.map,
+        position: {
+          lat: place.latitude,
+          lng: place.longitude
+        },
+        title: place.name
+      })
+
+      marker.addListener('click', function() {
+        self.openMarker(marker)
+      })
+
+      bounds.extend(marker.position)
+      markers.push(marker)
+    })
+
+    this.state.map.fitBounds(bounds)
+    this.setState({
+      markers: markers,
+      searchResultMarkers: markers
+    })
+
+  } 
+
+  openMarker (marker) {
+    const infowindow = this.state.infowindow
+
+    if (infowindow.marker !== marker) {
+      infowindow.marker = marker;
+      infowindow.open(this.state.map, marker)
+    }
+
+    this.loadInfowindowContent(marker);
+    marker.setAnimation(window.google.maps.Animation.DROP)
+
+
+
+    this.state.map.setCenter(marker.position)
+  }
+
+  loadInfowindowContent(marker) {
+    let placeInfo = this.state.places.filter(place => place.name === marker.title)[0]
+
+    const infowindowContent = 
+      `<h3>${placeInfo.name}</h3>`+
+      `<div>${placeInfo.type}</div>`+
+      `<div>Rating: ${placeInfo.rating}</div>`+
+      `<div>Stars: ${placeInfo.stars}, (${placeInfo.starVotes} reviews)</div>`+
+      `<a href=${placeInfo.url}>Mountain Project Link</a><br>`+
+      `<img src=${placeInfo.imgSmall}>`
+
+    this.state.infowindow.setContent(infowindowContent)
+  }
+
+  updateSearchResultMarkers(searchResultMarkers) {
+    this.setState({searchResultMarkers}, () => {
+      // close open infowindow
+      this.state.infowindow.close()
+      
+      // initially hide all markers
+      this.state.markers.map(marker => marker.setVisible(false))
+      
+      var bounds = new window.google.maps.LatLngBounds();
+      
+      if (this.state.searchResultMarkers.length !== 0) {
+        this.state.searchResultMarkers.forEach(marker => {
+          marker.setVisible(true)
+          bounds.extend(marker.position)
+        })
+
+        this.state.map.fitBounds(bounds)
+      }
+
+      // show only search result markers
+    })
   }
 
   toggleMenu() {
-    document.getElementById('list-container').classList.toggle('closed')
+    const sideBar = document.getElementById('sidebar')
+    sideBar.classList.toggle('closed')
+    
+    const mapDiv = document.getElementById('map')
+    mapDiv.classList.toggle('menu-open')
   }
 
   render() {
+    // {console.log(this.state.searchResultMarkers)}
     return (
       <div id="container">
         <header id="areaTitle">
@@ -172,25 +207,26 @@ class App extends Component {
           ></button>
           <h1>{this.state.areaName} Classic Climbing Routes!</h1>
         </header>
-         <div id="main">
-          <div id="list-container" className="closed">
+         <div id="sidebar" className="closed">
+          <div id="list-container">
             <div id="search-container">
               <PlacesSearch 
-                places = {this.state.places}
-                updatevisibleMarkers = {this.updatevisibleMarkers}
                 markers = {this.state.markers}
-                infoWindows = {this.state.infoWindows}
+                updateSearchResultMarkers = {this.updateSearchResultMarkers}
               />
             </div>
             <ul id="places-list">
               <PlacesList 
-                visibleMarkers = {this.state.visibleMarkers}
-                selectedMarker = {this.state.selectedMarker}
-                updateSelectedMarker = {this.updateSelectedMarker}
+                searchResultMarkers = {this.state.searchResultMarkers}
+                openMarker = {this.openMarker}
               />
-
             </ul>
+            <div id="att-div">
+              <p id="attribution">Data from Mountain Project API</p>
+            </div>
           </div>
+        </div>
+        <div id="main">
           <div id="map-container">
             <div id="map"></div>
           </div>

@@ -17,20 +17,8 @@ html, body {
 }
 
 /* Places List Styles */
-#places-list {
-	list-style-type: none;
-	padding: 10px;
-	/*height: calc(100vw-50px);*/
-}
-
-#places-list>li {
-	cursor: pointer;
-	padding: 5px;
-}
-
-#list-container {
-	padding: 10px;
-	width: 250px;
+#sidebar {
+	padding: 20px;
 	float: left;
 	height: 100%;
 	overflow-y: auto;
@@ -40,8 +28,41 @@ html, body {
   	color: white;
 }
 
-.closed {
-	display: none;
+#list-container input {
+	/*background-color: red;*/
+	width: 100%;
+	border-radius: 5px;
+	-webkit-appearance: none;
+	padding: 5px;
+}
+
+#places-list {
+	list-style-type: none;
+	padding: 0px;
+	/*height: calc(100vw-50px);*/
+}
+
+#places-list>li {
+	cursor: pointer;
+	padding: 5px;
+}
+
+
+.selected {
+	background-color: #F5E356;
+	color: black;
+}
+
+#att-div {
+	display: flex;w
+    justify-content: center;
+}
+
+
+#attribution {
+	font-size: .75em;
+	text-transform: uppercase;
+
 }
 
 /*Map Styles*/
@@ -49,18 +70,29 @@ html, body {
 	/*margin-left: 20%;*/
 }
 
+/* Infowindow style */
+.gm-style-iw > div > div > img {
+	margin: 10px auto;
+}
+
 /* Header Styles */
 #areaTitle {
 	align-items:center;
 	text-align: center;
-	background-color: #34888C;
+	background-color: black;
   	color: white;
 	display: flex;
 }
 
-#areaTitle>h1 {
+#areaTitle > h1 {
 	margin: 0 auto;
-	padding: 20px;
+	padding: 15px;
+	font-size: 1.5em;
+}
+
+/*Hamburger style*/
+.closed {
+	display: none;
 }
 
 .hamburgerIcon {
@@ -76,4 +108,29 @@ html, body {
 	font-size: 0;
 	vertical-align: middle;
 	align-self: center;
+}
+
+/* ====================== Media Queries ====================== */
+@media only screen and (max-width: 600px) {
+	#sidebar {
+		height: 190px;
+		width: 100%;
+	}
+
+	.menu-open {
+		margin-top: 190px;
+		height: 600px !important;
+	}
+}
+
+@media only screen and (min-width: 600px) {
+	#sidebar {
+		width: 330px;
+		height: calc(100% - 60px);
+	}
+
+	.menu-open {
+		margin-left: 330px;
+		/*height: 600px !important;*/
+	}
 }
