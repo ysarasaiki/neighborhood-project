@@ -111,7 +111,7 @@ html, body {
 /* ====================== Media Queries ====================== */
 @media only screen and (max-width: 600px) {
 	#sidebar {
-		height: 190px;
+		max-height: 190px;
 		width: 100%;
 	}
 
