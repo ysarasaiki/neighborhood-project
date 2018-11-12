@@ -23,13 +23,14 @@ class PlacesList extends Component {
 
 		return (
 			<React.Fragment>
-				{searchResultMarkers.map(marker => 
+				{searchResultMarkers.map((marker, index) => 
 					<li 
 						key={marker.title}
 						onClick = {() => {
 							openMarker(marker)
 							this.highlightListItem(marker)
 						}}
+						tabIndex = {index + 1}
 					><div role = "listitem">{marker.title}</div>
 					</li>
 				)}
