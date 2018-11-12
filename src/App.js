@@ -200,6 +200,7 @@ class App extends Component {
             className="hamburgerIcon"
             onClick = {this.toggleMenu}
             aria-label="Menu Icon"
+            tabIndex="1"
           ></button>
           <h1>{this.state.areaName} Classic Climbing Routes!</h1>
         </header>

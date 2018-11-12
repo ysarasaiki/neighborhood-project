@@ -30,7 +30,7 @@ class PlacesList extends Component {
 							openMarker(marker)
 							this.highlightListItem(marker)
 						}}
-					>{marker.title}
+					><div role = "listitem">{marker.title}</div>
 					</li>
 				)}
 
